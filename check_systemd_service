@@ -11,14 +11,14 @@ STATE_UNKNOWN=3
 PROGRAM=`basename "$0"`
 
 print_help() {
-    echo -n "This plugin checks status of systemctl service.
+    echo -n "This plugin checks status of systemd service.
 Returns exit codes based on nagios plugin api standard.
 
 Usage:
     $PROGRAM [OPTION]
 
 Options:
-    [service]           Name of systemctl service for check
+    [service]           Name of systemd service for check
     -V, --version       Current version of plugin
     -h, --help          Plugin help and usage
 
