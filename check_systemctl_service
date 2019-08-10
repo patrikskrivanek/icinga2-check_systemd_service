@@ -1,0 +1,84 @@
+#!/bin/bash
+
+VERSION='v1.0.0'
+RELEASE_DATE='2019-08-10'
+
+STATE_OK=0
+STATE_WARNING=1
+STATE_CRITICAL=2
+STATE_UNKNOWN=3
+
+PROGRAM=`basename "$0"`
+
+print_help() {
+    echo -n "This plugin checks status of systemctl service.
+Returns exit codes based on nagios plugin api standard.
+
+Usage:
+    $PROGRAM [OPTION]
+
+Options:
+    [service]           Name of systemctl service for check
+    -V, --version       Current version of plugin
+    -h, --help          Plugin help and usage
+
+Examples:
+    $PROGRAM cron
+    $PROGRAM mysql
+    $PROGRAM -V
+    $PROGRAM --help
+
+version: $VERSION
+release: $RELEASE_DATE
+"
+
+    exit $STATE_OK
+}
+
+if [ -z "$1" ]; then
+    print_help
+    exit $STATE_OK
+fi
+
+case "$1" in
+    --help)
+        print_help
+        exit $STATE_OK
+        ;;
+    -h)
+        print_help
+        exit $STATE_OK
+        ;;
+    --version)
+        echo $VERSION
+        exit $STATE_OK
+        ;;
+    -V)
+        echo $VERSION
+        exit $STATE_OK
+        ;;
+    *)
+        service=$1
+        status=$(systemctl is-enabled $service 2>/dev/null)
+        ret=$?
+
+        if [[ -z "$status" ]]; then
+            echo "ERROR: service $service doesn't exist"
+            exit $STATE_CRITICAL
+        fi
+
+        if [[ $ret -ne 0 ]]; then
+            echo "ERROR: service $service is $status"
+            exit $STATE_CRITICAL
+        fi
+
+        systemctl --quiet is-active $service
+        if [[ $? -ne 0 ]]; then
+            echo "ERROR: service $service is not running"
+            exit $STATE_CRITICAL
+        fi
+
+        echo "OK: service $service is running"
+        exit $STATE_OK
+        ;;
+esac
