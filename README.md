@@ -26,7 +26,7 @@ check_systemd_service --help
 Argument | Description | Required
 ------------ | ------------- | -------------
 [service] | Name of systemd service for check | yes
---restart | Restart service if is not running  *[added in v1.1.0]* | optional
+--restart | Restart service if is not running, **root privileges needed**  *[added in v1.1.0]* | optional
 -V --version | Show program version | optional
 -h --help | Show program help and usage | optional
 
