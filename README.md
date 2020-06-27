@@ -20,6 +20,57 @@ git https://github.com/patrikskrivanek/icinga2-check_systemd_service.git
 
 # run check_systemd_service program with help and learn how to use
 check_systemd_service --help
+
+# move the plugin check_systemd_service into your Icinga plugins dir on target hosts
+```
+
+### How to integrate the plugin into the Icinga monitoring process?
+```
+# service.conf
+apply Service for (service_name => config in host.vars.systemd) {
+    import "generic-service"
+    
+    check_command = "systemd_service"
+    display_name = config.friendly_name
+    vars.systemd_service_name = service_name
+    vars.systemd_restart = config.restart
+    
+    assign where host.vars.systemd != null
+}
+
+# commands.conf
+object CheckCommand "systemd_service" {
+    command = [ PluginDir + "/check_systemd_service" ]
+
+    arguments = {
+      "--service_name" = {
+        value = "$systemd_service_name$"
+        description = "Name of systemd service for check"
+        skip_key = true
+        required = true
+        order = 1
+      },
+      "--restart" = {
+        set_if = "$systemd_restart$"
+        description = "Restart service if is not running"
+        required = false
+        order = 2
+    }
+  }
+}
+
+# hosts.conf
+object Host "your-host" {
+  import "generic-host"
+
+  address = "your-host.domain"
+
+  vars.systemd["apache2"] = { friendly_name = "Apache Webserver", restart = true }
+  vars.systemd["mysql"] = { friendly_name = "MySQL Database", restart = true }
+  vars.systemd["cron"] = { friendly_name = "Cron Service", restart = false }
+
+  # rest of the host config...
+}
 ```
 
 ### Arguments
@@ -35,7 +86,7 @@ Argument | Description | Required
 # check if mysql is running
 check_systemd_service mysql
 
-# check if cron is running, if doesn't restart service
+# check if cron is running, otherwise restart service
 check_systemd_service cron --restart
 
 # check if apache2 webserver is running
