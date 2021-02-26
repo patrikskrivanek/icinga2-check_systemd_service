@@ -22,6 +22,8 @@ Usage:
 Options:
     [service]           name of systemd service for check
     --restart           restart service if is not running
+    --inverse           use !is-failed as status
+    --no-enable         does not check if enabled or not
     -V, --version       current version of plugin
     -h, --help          plugin help and usage
 
@@ -74,6 +76,14 @@ case "$2" in
     RESTART=YES
     shift
     ;;
+    --inverse)
+    INVERSE=YES
+    shift
+    ;;
+    --no-enable)
+    ENABLE=NO
+    shift
+    ;;
     *)
     # unknown option, save
     POSITIONAL+=("$2")
@@ -102,13 +112,16 @@ if [[ -z "$status" ]]; then
 fi
 
 # alternative state
-if [[ $ret -ne 0 ]]; then
+if [[ $ret -ne 0 ]] && [[ -z "$ENABLE" ]]; then
     echo "ERROR: service $service is $status"
     exit $STATE_CRITICAL
 fi
 
 # check if is or is not running
 systemctl --quiet is-active $service
+if [[ ! -z "$INVERSE" ]]; then
+    status=$(! systemctl is-failed $service 2>/dev/null)
+fi
 
 if [[ $? -ne 0 ]]; then
     if [[ ! -z "$RESTART" ]]; then
