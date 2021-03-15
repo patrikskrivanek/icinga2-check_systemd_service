@@ -16,7 +16,7 @@ sudo apt update
 sudo apt install git
 
 # clone repository
-git https://github.com/patrikskrivanek/icinga2-check_systemd_service.git
+git clone https://github.com/patrikskrivanek/icinga2-check_systemd_service.git
 
 # run check_systemd_service program with help and learn how to use
 check_systemd_service --help
