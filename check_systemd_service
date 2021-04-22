@@ -119,11 +119,14 @@ fi
 
 # check if is or is not running
 systemctl --quiet is-active $service
+ret=$?
+
 if [[ ! -z "$INVERSE" ]]; then
     status=$(! systemctl is-failed $service 2>/dev/null)
+    ret=$?
 fi
 
-if [[ $? -ne 0 ]]; then
+if [[ $ret -ne 0 ]]; then
     if [[ ! -z "$RESTART" ]]; then
         systemctl restart $service
 
